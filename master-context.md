@@ -2180,101 +2180,101 @@ DELIVERABLES
 ** Original TODO list **
 
 Initialize Next.js monorepo structure with turbo
-     ☒ Create packages/db directory with package.json
-     ☒ Create packages/ui directory with package.json
-     ☒ Create packages/config directory with ESLint/Tailwind configs
-     ☒ Create packages/lib directory with auth/rbac/schemas
-     ☒ Set up apps/web Next.js app with App Router
-     ☒ Configure TypeScript workspace with shared tsconfig
-     ☒ Create packages/db/prisma/schema.prisma with exact schema from brief
-     ☒ Set up DATABASE_URL environment variable
-     ☒ Generate Prisma client and run initial migration
-     ☒ Create packages/db/sql/001_search.sql with search extensions and indexes
-     ☒ Run pnpm run build to verify Phase 1 setup
-     ☒ Fix ESLint config error in apps/web
-     ☒ Apply manual SQL migration for search functionality
-     ☒ Create packages/db/seeds/populations.ts with MSM,TGW,PWID,etc.
-     ☒ Create packages/db/seeds/diseases.ts with HepB,HepC,Syphilis,etc.
-     ☒ Create packages/db/seeds/lab-panels.ts with CBC,Creatinine,SGPT_SGOT,etc.
-     ☒ Create packages/db/seeds/lab-tests.ts with CD4_count,VL_copies,Hgb,etc.
-     ☒ Create packages/db/seeds/medications.ts with TLD,3HP,PrEP,STI meds
-     ☒ Create packages/db/seeds/regimens.ts with TLD,3HP,PrEP-TDF/FTC
-     ☒ Create packages/db/seeds/roles.ts with PHYSICIAN,NURSE,CASE_MANAGER,ENCODER
-     ☒ Create packages/db/seeds/facilities.ts with sample facility
-     ☒ Create packages/db/seeds/index.ts to run all seed files
-     ☒ Run seed files to populate database
-     ☒ Create packages/lib/auth/otp.ts with OTP generation and hashing
-     ☒ Create packages/lib/auth/providers/email.ts with Resend integration
-     ☒ Create packages/lib/auth/providers/sms.ts with Twilio integration
-     ☒ Create packages/lib/auth/sessions.ts with cookie management
-     ☒ Create apps/web/app/api/auth/otp/request/route.ts
-     ☒ Create apps/web/app/api/auth/otp/verify/route.ts
-     ☒ Fix lint and type errors in auth routes
-     ☐ Create apps/web/middleware.ts for session loading and route protection
-     ☐ Create packages/lib/rbac/constants.ts with role definitions
-     ☐ Create packages/lib/rbac/policies.ts with permission policies
-     ☐ Create packages/lib/rbac/can.ts helper function
-     ☐ Seed admin user and sample accounts for each role
-     ☐ Create apps/web/app/api/clients/route.ts with GET search endpoint
-     ☐ Create apps/web/app/api/clients/[id]/route.ts with GET profile endpoint
-     ☐ Add POST method to clients route.ts for creation
-     ☐ Add PATCH method to clients/[id] route.ts for updates
-     ☐ Create apps/web/app/api/encounters/route.ts with POST endpoint
-     ☐ Create apps/web/app/api/labs/panels/route.ts with POST endpoint
-     ☐ Create apps/web/app/api/labs/results/route.ts with POST endpoint
-     ☐ Create apps/web/app/api/sti/history/route.ts with POST endpoint
-     ☐ Create apps/web/app/api/sti/screenings/route.ts with POST endpoint
-     ☐ Create apps/web/app/api/prescriptions/route.ts with POST endpoint
-     ☐ Create apps/web/app/api/dispenses/route.ts with POST endpoint
-     ☐ Create apps/web/app/api/tasks/route.ts with GET endpoint
-     ☐ Create apps/web/app/api/tasks/[id]/route.ts with PATCH endpoint
-     ☐ Create apps/web/app/api/dashboard/route.ts with GET endpoint
-     ☐ Create apps/web/app/api/jobs/refresh-summaries/route.ts
-     ☐ Create apps/web/app/api/jobs/generate-tasks/route.ts
-     ☐ Create apps/web/app/api/jobs/refresh-dashboard/route.ts
-     ☐ Create apps/web/app/globals.css with CSS variables and theme system
-     ☐ Configure Tailwind config to use custom colors and animations
-     ☐ Create packages/ui/components/SearchInput.tsx with debounced search
-     ☐ Create packages/ui/components/KPICard.tsx component
-     ☐ Create packages/ui/components/TaskList.tsx component
-     ☐ Create packages/ui/components/LabPanelCard.tsx component
-     ☐ Create packages/ui/components/PrescriptionCard.tsx component
-     ☐ Create packages/ui/components/RegimenBadge.tsx component
-     ☐ Create packages/ui/components/PopulationChips.tsx component
-     ☐ Create packages/ui/components/StatusBadge.tsx component
-     ☐ Create packages/ui/components/RedRibbonIcon.tsx SVG component
-     ☐ Create apps/web/app/login/page.tsx with OTP authentication
-     ☐ Create apps/web/app/verify/page.tsx for OTP verification
-     ☐ Create apps/web/app/page.tsx dashboard with KPI cards and charts
-     ☐ Create apps/web/app/clients/page.tsx with search and list
-     ☐ Create apps/web/app/clients/[id]/page.tsx profile with tabs
-     ☐ Create packages/ui/components/modals/NewClientModal.tsx
-     ☐ Create packages/ui/components/modals/LabPanelModal.tsx
-     ☐ Create packages/ui/components/modals/LabResultsModal.tsx
-     ☐ Create packages/ui/components/modals/PrescriptionModal.tsx
-     ☐ Create packages/ui/components/modals/DispenseModal.tsx
-     ☐ Create packages/ui/components/modals/STIScreeningModal.tsx
-     ☐ Create packages/lib/schemas/client.ts with Zod validation schemas
-     ☐ Create packages/lib/schemas/lab.ts with Zod validation schemas
-     ☐ Create packages/lib/schemas/pharmacy.ts with Zod validation schemas
-     ☐ Create packages/lib/schemas/auth.ts with Zod validation schemas
-     ☐ Create SQL trigger for updating clients.last_visit_at from encounters
-     ☐ Create SQL trigger for updating clients.last_visit_at from dispenses
-     ☐ Create materialized views for dashboard metrics
-     ☐ Create packages/lib/audit/logger.ts middleware
-     ☐ Apply audit logging to all mutating API routes
-     ☐ Create packages/lib/rate-limit/index.ts with Redis/memory store
-     ☐ Apply rate limiting to auth endpoints
-     ☐ Apply rate limiting to search and export endpoints
-     ☐ Add focus trap to all modals
-     ☐ Add skip links to main navigation
-     ☐ Add proper form labels and ARIA attributes
-     ☐ Add ARIA live regions for error announcements
-     ☐ Create packages/lib/rbac/__tests__/can.test.ts unit tests
-     ☐ Create packages/lib/__tests__/search.test.ts for search query semantics
-     ☐ Create apps/web/__tests__/api/jobs/generate-tasks.test.ts integration tests
-     ☐ Create .env.example with all required environment variables
-     ☐ Create README.md with setup instructions and env var docs
-     ☐ Configure Vercel project settings and environment variables
-     ☐ Set up Vercel Cron jobs for nightly background tasks
-     ☐ Configure security headers and CSP in next.config.js
+      Create packages/db directory with package.json
+      Create packages/ui directory with package.json
+      Create packages/config directory with ESLint/Tailwind configs
+      Create packages/lib directory with auth/rbac/schemas
+      Set up apps/web Next.js app with App Router
+      Configure TypeScript workspace with shared tsconfig
+      Create packages/db/prisma/schema.prisma with exact schema from brief
+      Set up DATABASE_URL environment variable
+      Generate Prisma client and run initial migration
+      Create packages/db/sql/001_search.sql with search extensions and indexes
+      Run pnpm run build to verify Phase 1 setup
+      Fix ESLint config error in apps/web
+      Apply manual SQL migration for search functionality
+      Create packages/db/seeds/populations.ts with MSM,TGW,PWID,etc.
+      Create packages/db/seeds/diseases.ts with HepB,HepC,Syphilis,etc.
+      Create packages/db/seeds/lab-panels.ts with CBC,Creatinine,SGPT_SGOT,etc.
+      Create packages/db/seeds/lab-tests.ts with CD4_count,VL_copies,Hgb,etc.
+      Create packages/db/seeds/medications.ts with TLD,3HP,PrEP,STI meds
+      Create packages/db/seeds/regimens.ts with TLD,3HP,PrEP-TDF/FTC
+      Create packages/db/seeds/roles.ts with PHYSICIAN,NURSE,CASE_MANAGER,ENCODER
+      Create packages/db/seeds/facilities.ts with sample facility
+      Create packages/db/seeds/index.ts to run all seed files
+      Run seed files to populate database
+      Create packages/lib/auth/otp.ts with OTP generation and hashing
+      Create packages/lib/auth/providers/email.ts with Resend integration
+      Create packages/lib/auth/providers/sms.ts with Twilio integration
+      Create packages/lib/auth/sessions.ts with cookie management
+      Create apps/web/app/api/auth/otp/request/route.ts
+      Create apps/web/app/api/auth/otp/verify/route.ts
+      Fix lint and type errors in auth routes
+      Create apps/web/middleware.ts for session loading and route protection
+      Create packages/lib/rbac/constants.ts with role definitions
+      Create packages/lib/rbac/policies.ts with permission policies
+      Create packages/lib/rbac/can.ts helper function
+      Seed admin user and sample accounts for each role
+      Create apps/web/app/api/clients/route.ts with GET search endpoint
+      Create apps/web/app/api/clients/[id]/route.ts with GET profile endpoint
+      Add POST method to clients route.ts for creation
+      Add PATCH method to clients/[id] route.ts for updates
+      Create apps/web/app/api/encounters/route.ts with POST endpoint
+      Create apps/web/app/api/labs/panels/route.ts with POST endpoint
+      Create apps/web/app/api/labs/results/route.ts with POST endpoint
+      Create apps/web/app/api/sti/history/route.ts with POST endpoint
+      Create apps/web/app/api/sti/screenings/route.ts with POST endpoint
+      Create apps/web/app/api/prescriptions/route.ts with POST endpoint
+      Create apps/web/app/api/dispenses/route.ts with POST endpoint
+      Create apps/web/app/api/tasks/route.ts with GET endpoint
+      Create apps/web/app/api/tasks/[id]/route.ts with PATCH endpoint
+      Create apps/web/app/api/dashboard/route.ts with GET endpoint
+      Create apps/web/app/api/jobs/refresh-summaries/route.ts
+      Create apps/web/app/api/jobs/generate-tasks/route.ts
+      Create apps/web/app/api/jobs/refresh-dashboard/route.ts
+      Create apps/web/app/globals.css with CSS variables and theme system
+      Configure Tailwind config to use custom colors and animations
+      Create packages/ui/components/SearchInput.tsx with debounced search
+      Create packages/ui/components/KPICard.tsx component
+      Create packages/ui/components/TaskList.tsx component
+      Create packages/ui/components/LabPanelCard.tsx component
+      Create packages/ui/components/PrescriptionCard.tsx component
+      Create packages/ui/components/RegimenBadge.tsx component
+      Create packages/ui/components/PopulationChips.tsx component
+      Create packages/ui/components/StatusBadge.tsx component
+      Create packages/ui/components/RedRibbonIcon.tsx SVG component
+      Create apps/web/app/login/page.tsx with OTP authentication
+      Create apps/web/app/verify/page.tsx for OTP verification
+      Create apps/web/app/page.tsx dashboard with KPI cards and charts
+      Create apps/web/app/clients/page.tsx with search and list
+      Create apps/web/app/clients/[id]/page.tsx profile with tabs
+      Create packages/ui/components/modals/NewClientModal.tsx
+      Create packages/ui/components/modals/LabPanelModal.tsx
+      Create packages/ui/components/modals/LabResultsModal.tsx
+      Create packages/ui/components/modals/PrescriptionModal.tsx
+      Create packages/ui/components/modals/DispenseModal.tsx
+      Create packages/ui/components/modals/STIScreeningModal.tsx
+      Create packages/lib/schemas/client.ts with Zod validation schemas
+      Create packages/lib/schemas/lab.ts with Zod validation schemas
+      Create packages/lib/schemas/pharmacy.ts with Zod validation schemas
+      Create packages/lib/schemas/auth.ts with Zod validation schemas
+      Create SQL trigger for updating clients.last_visit_at from encounters
+      Create SQL trigger for updating clients.last_visit_at from dispenses
+      Create materialized views for dashboard metrics
+      Create packages/lib/audit/logger.ts middleware
+      Apply audit logging to all mutating API routes
+      Create packages/lib/rate-limit/index.ts with Redis/memory store
+      Apply rate limiting to auth endpoints
+      Apply rate limiting to search and export endpoints
+      Add focus trap to all modals
+      Add skip links to main navigation
+      Add proper form labels and ARIA attributes
+      Add ARIA live regions for error announcements
+      Create packages/lib/rbac/__tests__/can.test.ts unit tests
+      Create packages/lib/__tests__/search.test.ts for search query semantics
+      Create apps/web/__tests__/api/jobs/generate-tasks.test.ts integration tests
+      Create .env.example with all required environment variables
+      Create README.md with setup instructions and env var docs
+      Configure Vercel project settings and environment variables
+      Set up Vercel Cron jobs for nightly background tasks
+      Configure security headers and CSP in next.config.js
