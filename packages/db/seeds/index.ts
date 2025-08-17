@@ -7,6 +7,7 @@ import { seedMedications } from './medications'
 import { seedRegimens } from './regimens'
 import { seedRoles } from './roles'
 import { seedFacilities } from './facilities'
+import { seedUsers } from './users'
 
 const prisma = new PrismaClient()
 
@@ -16,6 +17,7 @@ async function main() {
   try {
     await seedRoles()
     await seedFacilities()
+    await seedUsers()
     await seedPopulations()
     await seedDiseases()
     await seedLabPanels()

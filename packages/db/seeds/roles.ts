@@ -9,9 +9,9 @@ export async function seedRoles() {
     { name: 'CASE_MANAGER' },
     { name: 'ENCODER' },
     { name: 'ADMIN' },
-    { name: 'PHARMACIST' },
-    { name: 'LABORATORY' },
-    { name: 'SOCIAL_WORKER' }
+    { name: 'DIRECTOR' },
+    { name: 'DATA_ANALYST' },
+    { name: 'PHARMACIST' }
   ]
 
   console.log('Seeding user roles...')
