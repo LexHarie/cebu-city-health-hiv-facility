@@ -1,0 +1,500 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ENUMS
+enum LifecycleStatus { 
+  ACTIVE 
+  TRANSFERRED_OUT 
+  EXPIRED 
+  LOST_TO_FOLLOW_UP 
+  INACTIVE 
+}
+
+enum SexAssignedAtBirth { 
+  MALE 
+  FEMALE 
+  INTERSEX 
+  UNKNOWN 
+}
+
+enum ResultStatus { 
+  POSITIVE 
+  NEGATIVE 
+  INDETERMINATE 
+  PENDING 
+  NOT_DONE 
+}
+
+enum ViralLoadStatus { 
+  UNDETECTABLE 
+  SUPPRESSED 
+  DETECTABLE 
+  HIGH_NOT_SUPPRESSED 
+  PENDING 
+  NOT_DONE 
+}
+
+enum TaskType { 
+  FOLLOW_UP 
+  REFILL_PREP 
+  REFILL_ARV 
+  LABS_PENDING 
+  VL_MONITOR 
+  STI_SCREENING 
+  LTFU_REVIEW 
+  ADMIN 
+}
+
+enum TaskStatus { 
+  OPEN 
+  DONE 
+  DISMISSED 
+}
+
+enum MedicationCategory { 
+  ARV 
+  PREP 
+  TB_PROPHYLAXIS 
+  STI 
+  OTHER 
+}
+
+enum OtpType { 
+  EMAIL 
+  SMS 
+  TOTP 
+}
+
+// RBAC
+model Facility {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  address   String?
+  clients   Client[]
+  users     User[]
+  transfersFrom TransferEvent[] @relation("transfer_from")
+  transfersTo   TransferEvent[] @relation("transfer_to")
+  currentClients Client[] @relation("current_facility")
+  createdAt DateTime @default(now())
+  
+  @@map("facilities")
+}
+
+model Role {
+  id    String @id @default(uuid())
+  name  String @unique
+  users UserRole[]
+  tasks Task[]
+  
+  @@map("roles")
+}
+
+model User {
+  id          String      @id @default(uuid())
+  email       String      @unique
+  phone       String?     @db.VarChar(32)
+  displayName String?     @map("display_name")
+  facilityId  String?     @map("facility_id")
+  facility    Facility?   @relation(fields: [facilityId], references: [id])
+  roles       UserRole[]
+  sessions    Session[]
+  otpCodes    OtpCode[]
+  caseClients Client[]    @relation("CaseManagerToClient")
+  auditLogs   AuditLog[]
+  encounters  Encounter[]
+  prescriptions Prescription[]
+  tasks       Task[]
+  createdAt   DateTime    @default(now())
+  
+  @@map("users")
+}
+
+model UserRole {
+  userId String @map("user_id")
+  roleId String @map("role_id")
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+// CLIENT CORE
+model Client {
+  id            String   @id @default(uuid())
+  facilityId    String   @map("facility_id")
+  facility      Facility @relation(fields: [facilityId], references: [id])
+  dateEnrolled  DateTime @map("date_enrolled")
+
+  clientCode    String   @map("client_code")
+  uic           String   @unique
+  philHealth    String?  @map("philhealth_number")
+
+  legalSurname  String   @map("legal_surname")
+  legalFirst    String   @map("legal_first_name")
+  legalMiddle   String?  @map("legal_middle_name")
+  suffix        String?
+  preferredName String?  @map("preferred_name")
+
+  dateOfBirth   DateTime? @map("date_of_birth")
+  sexAtBirth    SexAssignedAtBirth @map("sex_assigned_at_birth")
+  genderIdentityId String? @map("gender_identity_id")
+  genderIdentity   Lookup? @relation("gender_identity", fields: [genderIdentityId], references: [id])
+
+  homeAddress   String?  @map("home_address")
+  workAddress   String?  @map("work_address")
+  occupation    String?
+
+  contactNumber String?  @map("contact_number")
+  email         String?  @map("email_address")
+
+  caseManagerId String?  @map("case_manager_id")
+  caseManager   User?    @relation("CaseManagerToClient", fields: [caseManagerId], references: [id])
+
+  notes         String?
+
+  currentFacilityId String  @map("current_facility_id")
+  currentFacility   Facility @relation("current_facility", fields: [currentFacilityId], references: [id])
+  status        LifecycleStatus @default(ACTIVE)
+  expirationDate DateTime?  @map("expiration_date")
+
+  lastVisitAt   DateTime? @map("last_visit_at")
+  ageAtEnrollmentYears Int? @map("age_at_enrollment_years")
+
+  clinicalSummary ClinicalSummary?
+  encounters    Encounter[]
+  transfers     TransferEvent[]
+  populations   ClientPopulationMap[]
+  labPanels     LabPanel[]
+  stiHistory    STIHistory[]
+  stiScreenings STIScreening[]
+  prescriptions Prescription[]
+  tasks         Task[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([facilityId, clientCode])
+  @@index([dateEnrolled])
+  @@index([legalSurname, legalFirst])
+  @@map("clients")
+}
+
+model ClinicalSummary {
+  clientId        String @id @map("client_id")
+  client          Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  baselineCd4     Int?    @map("baseline_cd4")
+  baselineCd4Date DateTime? @map("baseline_cd4_date")
+
+  firstViralLoadDate DateTime? @map("first_viral_load_date")
+  viralLoadStatus     ViralLoadStatus? @map("viral_load_status")
+
+  currentArvRegimenId String?  @map("current_arv_regimen_id")
+  currentArvRegimen   Regimen? @relation("current_arv", fields: [currentArvRegimenId], references: [id])
+
+  currentPrepRegimenId String? @map("current_prep_regimen_id")
+  currentPrepRegimen   Regimen? @relation("current_prep", fields: [currentPrepRegimenId], references: [id])
+
+  updatedAt DateTime @updatedAt
+  
+  @@map("clinical_summaries")
+}
+
+model TransferEvent {
+  id          String   @id @default(uuid())
+  clientId    String   @map("client_id")
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  fromFacilityId String? @map("from_facility_id")
+  toFacilityId   String? @map("to_facility_id")
+  fromFacility   Facility? @relation("transfer_from", fields: [fromFacilityId], references: [id])
+  toFacility     Facility? @relation("transfer_to", fields: [toFacilityId], references: [id])
+  transferDate DateTime @map("transfer_date")
+  note         String?
+  
+  @@index([clientId, transferDate])
+  @@map("transfer_events")
+}
+
+// LOOKUPS / CATEGORIES
+model Lookup {
+  id      String @id @default(uuid())
+  type    String
+  code    String
+  label   String
+  extra   Json?
+  active  Boolean @default(true)
+  
+  genderIdentityClients Client[] @relation("gender_identity")
+  clientPopulations ClientPopulationMap[]
+  stiHistoryDiseases STIHistory[] @relation("disease_hist")
+  stiScreeningDiseases STIScreening[] @relation("disease_screen")
+  labPanelTypes LabPanel[] @relation("panel_type")
+  labTestTypes LabResult[] @relation("test_type")
+  
+  @@unique([type, code])
+  @@map("lookups")
+}
+
+model ClientPopulationMap {
+  clientId String @map("client_id")
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  populationId String @map("population_id")
+  population   Lookup @relation(fields: [populationId], references: [id])
+  
+  @@id([clientId, populationId])
+  @@map("client_population_map")
+}
+
+// ENCOUNTERS
+model Encounter {
+  id        String   @id @default(uuid())
+  clientId  String   @map("client_id")
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clinicianId String? @map("clinician_id")
+  clinician User? @relation(fields: [clinicianId], references: [id])
+  date      DateTime
+  type      String
+  note      String?
+  labPanels LabPanel[]
+  createdAt DateTime @default(now())
+  
+  @@index([clientId, date])
+  @@map("encounters")
+}
+
+// LABS
+model LabPanel {
+  id          String   @id @default(uuid())
+  clientId    String   @map("client_id")
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  encounterId String?  @map("encounter_id")
+  encounter   Encounter? @relation(fields: [encounterId], references: [id])
+
+  panelTypeId String   @map("panel_type_id")
+  panelType   Lookup   @relation("panel_type", fields: [panelTypeId], references: [id])
+  orderedAt   DateTime? @map("ordered_at")
+  collectedAt DateTime? @map("collected_at")
+  reportedAt  DateTime? @map("reported_at")
+  labName     String?  @map("lab_name")
+  status      ResultStatus @default(PENDING)
+  results     LabResult[]
+  stiScreenings STIScreening[]
+
+  @@index([clientId, reportedAt])
+  @@map("lab_panels")
+}
+
+model LabResult {
+  id        String @id @default(uuid())
+  panelId   String @map("panel_id")
+  panel     LabPanel @relation(fields: [panelId], references: [id], onDelete: Cascade)
+
+  testTypeId String  @map("test_type_id")
+  testType   Lookup  @relation("test_type", fields: [testTypeId], references: [id])
+
+  valueNum   Float?  @map("value_num")
+  valueText  String? @map("value_text")
+  unit       String?
+  refLow     Float?  @map("ref_low")
+  refHigh    Float?  @map("ref_high")
+  abnormal   Boolean?
+  
+  @@index([panelId])
+  @@map("lab_results")
+}
+
+// STIs
+model STIHistory {
+  id          String @id @default(uuid())
+  clientId    String @map("client_id")
+  client      Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  diseaseId   String  @map("disease_id")
+  disease     Lookup  @relation("disease_hist", fields: [diseaseId], references: [id])
+
+  hadHistory  Boolean @map("had_history")
+  recordedAt  DateTime @default(now()) @map("recorded_at")
+  note        String?
+  
+  @@unique([clientId, diseaseId])
+  @@map("sti_history")
+}
+
+model STIScreening {
+  id          String @id @default(uuid())
+  clientId    String @map("client_id")
+  client      Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  diseaseId   String  @map("disease_id")
+  disease     Lookup  @relation("disease_screen", fields: [diseaseId], references: [id])
+
+  screeningDate DateTime @map("screening_date")
+  result        ResultStatus
+  labPanelId    String? @map("lab_panel_id")
+  labPanel      LabPanel? @relation(fields: [labPanelId], references: [id])
+  testName      String? @map("test_name")
+  note          String?
+  
+  @@index([clientId, screeningDate])
+  @@map("sti_screenings")
+}
+
+// PHARMACY
+model Medication {
+  id        String @id @default(uuid())
+  name      String
+  category  MedicationCategory
+  code      String?
+  extra     Json?
+  active    Boolean @default(true)
+  regimenItems RegimenItem[]
+  prescriptions Prescription[]
+  
+  @@unique([name, category])
+  @@map("medications")
+}
+
+model Regimen {
+  id        String @id @default(uuid())
+  name      String
+  category  MedicationCategory
+  active    Boolean @default(true)
+  items     RegimenItem[]
+  prescriptions Prescription[]
+  arvSummaries ClinicalSummary[] @relation("current_arv")
+  prepSummaries ClinicalSummary[] @relation("current_prep")
+  
+  @@unique([name, category])
+  @@map("regimens")
+}
+
+model RegimenItem {
+  regimenId   String @map("regimen_id")
+  regimen     Regimen @relation(fields: [regimenId], references: [id], onDelete: Cascade)
+  medicationId String @map("medication_id")
+  medication   Medication @relation(fields: [medicationId], references: [id])
+  qtyPerDose   Float? @map("qty_per_dose")
+  unit         String?
+  
+  @@id([regimenId, medicationId])
+  @@map("regimen_items")
+}
+
+model Prescription {
+  id          String @id @default(uuid())
+  clientId    String @map("client_id")
+  client      Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  regimenId   String? @map("regimen_id")
+  regimen     Regimen? @relation(fields: [regimenId], references: [id])
+
+  medicationId String? @map("medication_id")
+  medication   Medication? @relation(fields: [medicationId], references: [id])
+
+  category    MedicationCategory
+  startDate   DateTime @map("start_date")
+  endDate     DateTime? @map("end_date")
+  prescriberId String? @map("prescriber_id")
+  prescriber   User? @relation(fields: [prescriberId], references: [id])
+
+  instructions String?
+  reasonChange String? @map("reason_change")
+
+  dispenses   Dispense[]
+  isActive    Boolean @default(true) @map("is_active")
+  
+  @@index([clientId, category, isActive])
+  @@map("prescriptions")
+}
+
+model Dispense {
+  id             String   @id @default(uuid())
+  prescriptionId String   @map("prescription_id")
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  dispensedAt    DateTime @map("dispensed_at")
+  daysSupply     Int?     @map("days_supply")
+  quantity       Float?
+  unit           String?
+  nextRefillDate DateTime? @map("next_refill_date")
+  note           String?
+  
+  @@index([dispensedAt])
+  @@map("dispenses")
+}
+
+// TASKS / REMINDERS
+model Task {
+  id        String   @id @default(uuid())
+  clientId  String   @map("client_id")
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  type      TaskType
+  title     String
+  dueDate   DateTime? @map("due_date")
+  status    TaskStatus @default(OPEN)
+  assignedToRoleId String? @map("assigned_to_role_id")
+  assignedToRole   Role? @relation(fields: [assignedToRoleId], references: [id])
+  createdById String? @map("created_by_id")
+  createdBy   User? @relation(fields: [createdById], references: [id])
+  payload   Json?
+  createdAt DateTime @default(now())
+  completedAt DateTime? @map("completed_at")
+  
+  @@index([clientId, type, status])
+  @@map("tasks")
+}
+
+// AUDIT + AUTH
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id])
+  actorType String   @map("actor_type")
+  action    String
+  entity    String?
+  entityId  String?  @map("entity_id")
+  before    Json?
+  after     Json?
+  ip        String?
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now())
+  
+  @@index([action, createdAt])
+  @@map("audit_logs")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime @map("expires_at")
+  ip        String?
+  userAgent String?  @map("user_agent")
+  
+  @@index([userId, expiresAt])
+  @@map("sessions")
+}
+
+model OtpCode {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      OtpType
+  codeHash  String   @map("code_hash")
+  sentTo    String   @map("sent_to")
+  expiresAt DateTime @map("expires_at")
+  consumedAt DateTime? @map("consumed_at")
+  attempts  Int     @default(0)
+  createdAt DateTime @default(now())
+  
+  @@index([userId, type, expiresAt, consumedAt])
+  @@map("otp_codes")
+}

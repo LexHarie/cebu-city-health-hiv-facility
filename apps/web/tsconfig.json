@@ -1,0 +1,18 @@
+{
+  "extends": "@cebu-health/config/typescript",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./app/*"],
+      "@cebu-health/db": ["../../packages/db"],
+      "@cebu-health/ui": ["../../packages/ui"],
+      "@cebu-health/lib": ["../../packages/lib"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ]
+}
