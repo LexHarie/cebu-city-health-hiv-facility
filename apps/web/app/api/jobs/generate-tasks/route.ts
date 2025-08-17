@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient, TaskType } from '@prisma/client'
+import { PrismaClient, TaskType, type Prisma } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error generating tasks:', error)
     return NextResponse.json(
       { error: 'Failed to generate tasks' },
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function generateLTFUTasks(tx: any) {
+async function generateLTFUTasks(tx: Prisma.TransactionClient) {
   const ltfuDate = new Date()
   ltfuDate.setDate(ltfuDate.getDate() - 90)
 
@@ -52,7 +53,7 @@ async function generateLTFUTasks(tx: any) {
       )
   `
 
-  for (const client of ltfuClients as any[]) {
+  for (const client of ltfuClients as Array<{id: string; client_code: string; legal_surname: string; legal_first_name: string}>) {
     await tx.task.create({
       data: {
         clientId: client.id,
@@ -68,7 +69,7 @@ async function generateLTFUTasks(tx: any) {
   }
 }
 
-async function generateLabTasks(tx: any) {
+async function generateLabTasks(tx: Prisma.TransactionClient) {
   const sixMonthsAgo = new Date()
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
 
@@ -96,7 +97,7 @@ async function generateLabTasks(tx: any) {
       )
   `
 
-  for (const client of clientsMissingVL as any[]) {
+  for (const client of clientsMissingVL as Array<{id: string; client_code: string; legal_surname: string; legal_first_name: string}>) {
     await tx.task.create({
       data: {
         clientId: client.id,
@@ -113,7 +114,7 @@ async function generateLabTasks(tx: any) {
   }
 }
 
-async function generateRefillTasks(tx: any) {
+async function generateRefillTasks(tx: Prisma.TransactionClient) {
   const threeDaysFromNow = new Date()
   threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3)
 
@@ -165,7 +166,7 @@ async function generateRefillTasks(tx: any) {
   }
 }
 
-async function generateVLMonitorTasks(tx: any) {
+async function generateVLMonitorTasks(tx: Prisma.TransactionClient) {
   const twelveMonthsAgo = new Date()
   twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1)
 
@@ -192,7 +193,7 @@ async function generateVLMonitorTasks(tx: any) {
       )
   `
 
-  for (const client of clientsNeedingVLMonitor as any[]) {
+  for (const client of clientsNeedingVLMonitor as Array<{id: string; client_code: string; legal_surname: string; legal_first_name: string}>) {
     await tx.task.create({
       data: {
         clientId: client.id,
