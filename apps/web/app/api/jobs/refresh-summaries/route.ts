@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function refreshClientSummary(tx: Prisma.TransactionClient, clientId: string) {
-  const baselineCD4 = await tx.$queryRaw`
+  const baselineCD4 = await tx.$queryRaw<Array<{cd4: number; reported_at: Date}>>`
     SELECT lr.value_num as cd4, lp.reported_at
     FROM lab_panels lp
     JOIN lab_results lr ON lr.panel_id = lp.id
@@ -49,7 +49,7 @@ async function refreshClientSummary(tx: Prisma.TransactionClient, clientId: stri
     LIMIT 1
   `
 
-  const latestVL = await tx.$queryRaw`
+  const latestVL = await tx.$queryRaw<Array<{vl: number; reported_at: Date}>>`
     SELECT lr.value_num as vl, lp.reported_at
     FROM lab_panels lp
     JOIN lab_results lr ON lr.panel_id = lp.id
@@ -62,7 +62,7 @@ async function refreshClientSummary(tx: Prisma.TransactionClient, clientId: stri
     LIMIT 1
   `
 
-  const firstVL = await tx.$queryRaw`
+  const firstVL = await tx.$queryRaw<Array<{first_vl_date: Date | null}>>`
     SELECT MIN(lp.reported_at) as first_vl_date
     FROM lab_panels lp
     JOIN lookups p ON p.id = lp.panel_type_id
