@@ -840,6 +840,8 @@ DELIVERABLES
 - Prisma migrations + manual SQL scripts in /packages/db/sql.
 - README with environment variables and first‑run steps.
 
+**  Mock up of the [FRONTEND]: **
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
