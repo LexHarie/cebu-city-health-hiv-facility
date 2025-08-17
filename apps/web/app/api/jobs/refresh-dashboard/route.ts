@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error refreshing dashboard:', error)
     return NextResponse.json(
       { error: 'Failed to refresh dashboard data' },
