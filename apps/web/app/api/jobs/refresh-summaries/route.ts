@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient, ViralLoadStatus } from '@prisma/client'
+import { PrismaClient, ViralLoadStatus, type Prisma } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error refreshing summaries:', error)
     return NextResponse.json(
       { error: 'Failed to refresh summaries' },
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function refreshClientSummary(tx: any, clientId: string) {
+async function refreshClientSummary(tx: Prisma.TransactionClient, clientId: string) {
   const baselineCD4 = await tx.$queryRaw`
     SELECT lr.value_num as cd4, lp.reported_at
     FROM lab_panels lp
