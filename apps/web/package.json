@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "pnpm run type-check && pnpm run lint && next build",
-    "dev": "next dev",
+    "build": "NEXT_TELEMETRY_DISABLED=1 pnpm run type-check && pnpm run lint && NODE_ENV=production next build",
+    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev",
     "lint": "next lint --fix",
-    "start": "next start",
+    "start": "NEXT_TELEMETRY_DISABLED=1 next start",
     "type-check": "tsc --noEmit --strict"
   },
   "dependencies": {
