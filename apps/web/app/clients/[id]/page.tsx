@@ -1,7 +1,7 @@
 import { Header } from "@/components/Header";
 import Link from "next/link";
 import * as React from "react";
-import { ClientTabs, type ClientTabsData, type LabPanel, type Prescription, type Encounter, type STIScreening, type STIHistory } from "./ClientTabs";
+import { ClientTabs, type ClientTabsData } from "./ClientTabs";
 
 type Lookup = { id: string; label: string };
 type ClientFull = ClientTabsData & {
