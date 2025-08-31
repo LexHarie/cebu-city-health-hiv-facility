@@ -13,7 +13,7 @@ export interface SearchInputProps
 const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
   ({ className, onSearch, debounceMs = 300, ...props }, ref) => {
     const [value, setValue] = React.useState(props.defaultValue || "");
-    const timeoutRef = React.useRef<NodeJS.Timeout>();
+    const timeoutRef = React.useRef<ReturnType<typeof setTimeout>>();
 
     React.useEffect(() => {
       if (timeoutRef.current) {
