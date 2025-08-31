@@ -18,14 +18,17 @@ export async function GET(request: NextRequest) {
   try {
     const session = await requireAuth()
     const { searchParams } = new URL(request.url)
-    
+    const qp = (k: string) => {
+      const v = searchParams.get(k)
+      return v === null ? undefined : v
+    }
     const params = searchParamsSchema.parse({
-      clientId: searchParams.get('clientId'),
-      type: searchParams.get('type'),
-      status: searchParams.get('status'),
-      assignedToRole: searchParams.get('assignedToRole'),
-      overdue: searchParams.get('overdue'),
-      limit: searchParams.get('limit')
+      clientId: qp('clientId'),
+      type: qp('type'),
+      status: qp('status'),
+      assignedToRole: qp('assignedToRole'),
+      overdue: qp('overdue'),
+      limit: qp('limit')
     })
 
     const whereClause: {
@@ -145,6 +148,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('GET /api/tasks error:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
