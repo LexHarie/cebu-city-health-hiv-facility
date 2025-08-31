@@ -8,6 +8,7 @@ import { seedRegimens } from './regimens'
 import { seedRoles } from './roles'
 import { seedFacilities } from './facilities'
 import { seedUsers } from './users'
+import { seedClients } from './clients'
 
 const prisma = new PrismaClient()
 
@@ -24,6 +25,7 @@ async function main() {
     await seedLabTests()
     await seedMedications()
     await seedRegimens()
+    await seedClients()
     
     console.log('✅ Database seeding completed successfully!')
   } catch (error) {
