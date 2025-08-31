@@ -20,6 +20,15 @@ export async function seedUsers() {
   const roleMap = Object.fromEntries(roles.map(r => [r.name, r.id]))
   
   const users = [
+    // Default Development User
+    {
+      email: 'lexthegreat223@gmail.com',
+      displayName: 'Development User',
+      phone: '+639171234566',
+      facilityId: cchd.id,
+      roles: ['DIRECTOR']
+    },
+    
     // System Administrator (DIRECTOR)
     {
       email: 'admin@cebu-health.gov.ph',
