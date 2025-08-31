@@ -205,7 +205,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ labResult }, { status: 201 })
     }
   } catch (error) {
-    console.error('POST /api/labs/results error:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
     }
