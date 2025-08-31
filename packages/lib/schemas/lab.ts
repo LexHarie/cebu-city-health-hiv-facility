@@ -45,9 +45,17 @@ export const UpdateLabPanelSchema = CreateLabPanelSchema.partial().omit({
   clientId: true
 });
 
-export const UpdateLabResultSchema = CreateLabResultSchema.partial().omit({
-  panelId: true,
-  testTypeId: true
+export const UpdateLabResultSchema = z.object({
+  valueNum: z.number().optional(),
+  valueText: z.string().max(500).optional(),
+  unit: z.string().max(20).optional(),
+  refLow: z.number().optional(),
+  refHigh: z.number().optional(),
+  abnormal: z.boolean().optional()
+}).partial().refine((data) => 
+  data.valueNum !== undefined || data.valueText !== undefined || 
+  Object.keys(data).length === 0, {
+  message: "Either valueNum or valueText must be provided"
 });
 
 export const CreateSTIScreeningSchema = z.object({
