@@ -135,7 +135,6 @@ export async function GET(
 
     return NextResponse.json({ client })
   } catch (error) {
-    console.error('GET /api/clients/[id] error:', error)
     if (error instanceof Error && error.message === 'Authentication required') {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
@@ -235,7 +234,6 @@ export async function PATCH(
 
     return NextResponse.json({ client: updatedClient })
   } catch (error) {
-    console.error('PATCH /api/clients/[id] error:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
     }
