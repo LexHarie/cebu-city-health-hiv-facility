@@ -59,7 +59,7 @@ function StatusBadge({ className, variant, status, children, ...props }: StatusB
       className={cn(
         statusBadgeVariants({ 
           variant: status ? undefined : variant,
-          status: status as any
+          status: status,
         }), 
         className
       )}
