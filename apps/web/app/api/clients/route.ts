@@ -38,12 +38,15 @@ export async function GET(request: NextRequest) {
   try {
     const session = await requireAuth()
     const { searchParams } = new URL(request.url)
-    
+    const qp = (k: string) => {
+      const v = searchParams.get(k)
+      return v === null ? undefined : v
+    }
     const params = searchParamsSchema.parse({
-      search: searchParams.get('search'),
-      status: searchParams.get('status'),
-      facility: searchParams.get('facility'),
-      limit: searchParams.get('limit')
+      search: qp('search'),
+      status: qp('status'),
+      facility: qp('facility'),
+      limit: qp('limit')
     })
 
     const whereClause: {
@@ -62,23 +65,36 @@ export async function GET(request: NextRequest) {
     }
 
     let clients
-    
     if (params.search) {
-      const searchTerm = params.search.trim().toLowerCase()
-      clients = await prisma.$queryRaw`
-        SELECT id, client_code, uic, legal_surname, legal_first_name, preferred_name, 
-               date_of_birth, status, last_visit_at, contact_number
-        FROM clients
-        WHERE (search_vector @@ plainto_tsquery('simple', ${searchTerm})
-           OR legal_surname ILIKE ${searchTerm + '%'}
-           OR client_code ILIKE ${searchTerm + '%'}
-           OR uic ILIKE ${searchTerm + '%'})
-          ${params.facility ? `AND facility_id = '${params.facility}'` : ''}
-          ${session.facilityId && !params.facility ? `AND facility_id = '${session.facilityId}'` : ''}
-          ${params.status ? `AND status = '${params.status}'` : ''}
-        ORDER BY legal_surname, legal_first_name
-        LIMIT ${params.limit}
-      `
+      const q = params.search.trim()
+      clients = await prisma.client.findMany({
+        where: {
+          ...whereClause,
+          OR: [
+            { legalSurname: { contains: q, mode: 'insensitive' } },
+            { legalFirst: { contains: q, mode: 'insensitive' } },
+            { clientCode: { contains: q, mode: 'insensitive' } },
+            { uic: { contains: q, mode: 'insensitive' } },
+          ]
+        },
+        select: {
+          id: true,
+          clientCode: true,
+          uic: true,
+          legalSurname: true,
+          legalFirst: true,
+          preferredName: true,
+          dateOfBirth: true,
+          status: true,
+          lastVisitAt: true,
+          contactNumber: true
+        },
+        orderBy: [
+          { legalSurname: 'asc' },
+          { legalFirst: 'asc' }
+        ],
+        take: params.limit
+      })
     } else {
       clients = await prisma.client.findMany({
         where: whereClause,
@@ -115,6 +131,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ clients })
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('GET /api/clients error:', error)
     if (error instanceof Error && error.message === 'Authentication required') {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
@@ -209,6 +226,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ client }, { status: 201 })
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('POST /api/clients error:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
