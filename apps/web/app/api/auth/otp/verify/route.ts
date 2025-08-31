@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient, OtpType } from '@prisma/client'
+import { PrismaClient, OtpType } from '@cebu-health/db'
 import { verifyOTP } from '@cebu-health/lib/auth/otp'
 import { createSession, setSessionCookie } from '@cebu-health/lib/auth/sessions'
 import { z } from 'zod'

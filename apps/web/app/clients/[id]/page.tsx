@@ -1,10 +1,10 @@
 import { Header } from "@/components/Header";
 import Link from "next/link";
 import * as React from "react";
-import { ClientTabs } from "./ClientTabs";
+import { ClientTabs, type ClientTabsData, type LabPanel, type Prescription, type Encounter, type STIScreening, type STIHistory } from "./ClientTabs";
 
 type Lookup = { id: string; label: string };
-type ClientFull = {
+type ClientFull = ClientTabsData & {
   id: string;
   legalSurname: string;
   legalFirst: string;
@@ -17,9 +17,6 @@ type ClientFull = {
   genderIdentity?: { id: string; label: string } | null;
   caseManager?: { id: string; displayName: string } | null;
   populations: { population: Lookup }[];
-  labPanels: any[];
-  encounters: any[];
-  prescriptions: any[];
 };
 
 function formatDate(d?: string | null): string {

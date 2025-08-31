@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "NEXT_TELEMETRY_DISABLED=1 pnpm run type-check && pnpm run lint && NODE_ENV=production next build",
+    "build": "NEXT_TELEMETRY_DISABLED=1 pnpm --filter @cebu-health/db db:generate && pnpm run type-check && pnpm run lint && NODE_ENV=production next build",
     "dev": "NEXT_TELEMETRY_DISABLED=1 next dev",
     "lint": "next lint --fix",
     "start": "NEXT_TELEMETRY_DISABLED=1 next start",

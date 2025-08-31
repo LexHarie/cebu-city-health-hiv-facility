@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient, OtpType } from '@prisma/client'
+import { PrismaClient, OtpType } from '@cebu-health/db'
 import { generateOTP, hashOTP, getOTPExpiryTime } from '@cebu-health/lib/auth/otp'
 import { sendEmailOTP } from '@cebu-health/lib/auth/providers/email'
 import { sendSMSOTP } from '@cebu-health/lib/auth/providers/sms'

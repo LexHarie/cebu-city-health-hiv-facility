@@ -2,8 +2,8 @@
 
 import * as React from "react";
 
-type LabResult = { testType: { label: string }; valueNum?: number | null; valueText?: string | null; unit?: string | null };
-type LabPanel = {
+export type LabResult = { testType: { label: string }; valueNum?: number | null; valueText?: string | null; unit?: string | null };
+export type LabPanel = {
   id: string;
   panelType: { label: string };
   orderedAt?: string | null;
@@ -12,7 +12,7 @@ type LabPanel = {
   status: string;
   results: LabResult[];
 };
-type Prescription = {
+export type Prescription = {
   id: string;
   category: 'ARV'|'PREP'|'TB_PROPHYLAXIS'|'STI'|'OTHER';
   startDate: string;
@@ -21,10 +21,10 @@ type Prescription = {
   medication?: { name: string } | null;
   isActive: boolean;
 };
-type Encounter = { id: string; date: string; type: string };
-type STIScreening = { id: string; screeningDate: string; result: string; disease: { label: string } };
-type STIHistory = { id: string; hadHistory: boolean; disease: { label: string }; recordedAt: string };
-type ClientFull = {
+export type Encounter = { id: string; date: string; type: string };
+export type STIScreening = { id: string; screeningDate: string; result: string; disease: { label: string } };
+export type STIHistory = { id: string; hadHistory: boolean; disease: { label: string }; recordedAt: string };
+export type ClientTabsData = {
   labPanels?: LabPanel[];
   prescriptions?: Prescription[];
   encounters?: Encounter[];
@@ -33,7 +33,7 @@ type ClientFull = {
   preferredName?: string | null;
 };
 
-export function ClientTabs({ client }: { client: ClientFull | null }) {
+export function ClientTabs({ client }: { client: ClientTabsData | null }) {
   const [tab, setTab] = React.useState<'labs'|'medications'|'encounters'|'sti'|'transfers'|'notes'>('labs');
   const TabBtn = ({ id, label }: { id: typeof tab; label: string }) => (
     <button onClick={() => setTab(id)} className={`tab-button border-b-2 py-4 px-1 text-sm font-medium ${tab===id ? 'border-lucky-1 text-lucky-1' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>{label}</button>

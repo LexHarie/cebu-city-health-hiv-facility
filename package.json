@@ -2,6 +2,7 @@
   "name": "cebu-city-health-database",
   "private": true,
   "scripts": {
+    "start": "pnpm --filter web start",
     "build": "TURBO_TELEMETRY_DISABLED=1 TURBO_NO_UPDATE_NOTIFIER=1 turbo build",
     "dev": "TURBO_TELEMETRY_DISABLED=1 TURBO_NO_UPDATE_NOTIFIER=1 turbo dev",
     "lint": "TURBO_TELEMETRY_DISABLED=1 TURBO_NO_UPDATE_NOTIFIER=1 turbo lint",
