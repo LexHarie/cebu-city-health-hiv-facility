@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { NextRequest } from "next/server";
 
 export type AuditAction = "LOGIN" | "READ" | "CREATE" | "UPDATE" | "DELETE" | "EXPORT";
@@ -10,8 +10,8 @@ export interface AuditLogData {
   action: AuditAction;
   entity?: string;
   entityId?: string;
-  before?: Record<string, any>;
-  after?: Record<string, any>;
+  before?: Prisma.InputJsonValue;
+  after?: Prisma.InputJsonValue;
   ip?: string;
   userAgent?: string;
 }
@@ -45,8 +45,8 @@ export class AuditLogger {
     entity: string,
     entityId: string,
     request?: NextRequest,
-    before?: Record<string, any>,
-    after?: Record<string, any>
+    before?: Prisma.InputJsonValue,
+    after?: Prisma.InputJsonValue
   ): Promise<void> {
     await this.log({
       userId,
@@ -65,8 +65,8 @@ export class AuditLogger {
     action: AuditAction,
     entity?: string,
     entityId?: string,
-    before?: Record<string, any>,
-    after?: Record<string, any>
+    before?: Prisma.InputJsonValue,
+    after?: Prisma.InputJsonValue
   ): Promise<void> {
     await this.log({
       actorType: "SYSTEM",
@@ -83,7 +83,7 @@ export class AuditLogger {
     const realIP = request.headers.get("x-real-ip");
     
     if (forwarded) {
-      return forwarded.split(",")[0].trim();
+      return forwarded.split(",")[0]?.trim() || "unknown";
     }
     
     if (realIP) {
@@ -102,7 +102,7 @@ export function createAuditMiddleware(prisma: PrismaClient) {
       userId: string,
       entity: string,
       entityId: string,
-      data: Record<string, any>,
+      data: Prisma.InputJsonValue,
       request?: NextRequest
     ) => {
       await logger.logUserAction(userId, "CREATE", entity, entityId, request, undefined, data);
@@ -112,8 +112,8 @@ export function createAuditMiddleware(prisma: PrismaClient) {
       userId: string,
       entity: string,
       entityId: string,
-      before: Record<string, any>,
-      after: Record<string, any>,
+      before: Prisma.InputJsonValue,
+      after: Prisma.InputJsonValue,
       request?: NextRequest
     ) => {
       await logger.logUserAction(userId, "UPDATE", entity, entityId, request, before, after);
@@ -123,7 +123,7 @@ export function createAuditMiddleware(prisma: PrismaClient) {
       userId: string,
       entity: string,
       entityId: string,
-      data: Record<string, any>,
+      data: Prisma.InputJsonValue,
       request?: NextRequest
     ) => {
       await logger.logUserAction(userId, "DELETE", entity, entityId, request, data, undefined);
