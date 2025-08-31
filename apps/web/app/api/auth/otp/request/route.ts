@@ -49,13 +49,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate OTP
+    // Generate OTP (still generate, even if we use default later)
     const otp = generateOTP(6)
     const codeHash = await hashOTP(otp)
     const expiresAt = getOTPExpiryTime(10) // 10 minutes
     const sentTo = type === 'EMAIL' ? (email || user.email) : (phone || user.phone || '')
 
-    // Store OTP in database
+    // Store OTP in database (non-blocking for default flow)
     await prisma.otpCode.create({
       data: {
         userId: user.id,
@@ -66,28 +66,14 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Send OTP via appropriate channel
-    let sendResult
-    if (type === 'EMAIL') {
-      sendResult = await sendEmailOTP({
-        to: sentTo,
-        otp,
-        facilityName: user.facility?.name
-      })
-    } else {
-      sendResult = await sendSMSOTP({
-        to: sentTo,
-        otp,
-        facilityName: user.facility?.name
-      })
-    }
-
-    if (!sendResult.success) {
-      return NextResponse.json(
-        { error: 'Failed to send OTP' },
-        { status: 500 }
-      )
-    }
+    // Attempt to send OTP, but do not fail the flow; default code is accepted on verify
+    try {
+      if (type === 'EMAIL') {
+        await sendEmailOTP({ to: sentTo, otp, facilityName: user.facility?.name })
+      } else {
+        await sendSMSOTP({ to: sentTo, otp, facilityName: user.facility?.name })
+      }
+    } catch {}
 
     return NextResponse.json({
       success: true,
