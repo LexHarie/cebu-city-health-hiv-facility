@@ -1,14 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { useState, useRef } from "react";
+import { useState, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { RedRibbonIcon } from "@cebu-health/ui/components/RedRibbonIcon";
 
-export default function VerifyPage() {
+function VerifyForm() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const searchParams = useSearchParams();
+  const typeParam = (searchParams.get("type") || "EMAIL") as "EMAIL" | "SMS";
+  const emailParam = searchParams.get("email") || "";
+  const phoneParam = searchParams.get("phone") || "";
 
   const handleCodeChange = (index: number, value: string) => {
     if (value.length > 1) return;
@@ -45,7 +50,7 @@ export default function VerifyPage() {
       const response = await fetch("/api/auth/otp/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: otpCode }),
+        body: JSON.stringify({ code: otpCode, type: typeParam, email: emailParam || undefined, phone: phoneParam || undefined }),
       });
 
       if (response.ok) {
@@ -66,6 +71,7 @@ export default function VerifyPage() {
       await fetch("/api/auth/otp/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: typeParam, email: emailParam || undefined, phone: phoneParam || undefined })
       });
     } catch (error) {
       // Handle resend error
@@ -80,11 +86,9 @@ export default function VerifyPage() {
             <RedRibbonIcon size={48} className="text-[#D4AF37]" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Verify Your Identity
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-900">Verify Your Identity</h1>
             <p className="text-gray-600 mt-2">
-              Enter the 6-digit verification code sent to your device
+              Enter the 6-digit verification code sent to your {typeParam === 'EMAIL' ? 'email' : 'phone'}
             </p>
           </div>
         </div>
@@ -95,9 +99,7 @@ export default function VerifyPage() {
               {code.map((digit, index) => (
                 <input
                   key={index}
-                  ref={(el) => {
-                    inputRefs.current[index] = el;
-                  }}
+                  ref={(el) => { inputRefs.current[index] = el; }}
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]"
@@ -112,9 +114,7 @@ export default function VerifyPage() {
             </div>
 
             {error && (
-              <div className="text-center text-sm text-red-600 bg-red-50 p-3 rounded-md">
-                {error}
-              </div>
+              <div className="text-center text-sm text-red-600 bg-red-50 p-3 rounded-md">{error}</div>
             )}
           </div>
 
@@ -127,25 +127,24 @@ export default function VerifyPage() {
           </button>
 
           <div className="text-center">
-            <button
-              type="button"
-              onClick={handleResendCode}
-              className="text-sm text-[#D4AF37] hover:text-[#B8941F] transition-colors"
-            >
+            <button type="button" onClick={handleResendCode} className="text-sm text-[#D4AF37] hover:text-[#B8941F] transition-colors">
               Didn&apos;t receive a code? Resend
             </button>
           </div>
         </form>
 
         <div className="text-center">
-          <a
-            href="/login"
-            className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            ← Back to login
-          </a>
+          <a href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">← Back to login</a>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-4 text-gray-600">Loading…</div>}>
+      <VerifyForm />
+    </Suspense>
   );
 }
