@@ -9,6 +9,9 @@ const PROTECTED_API_ROUTES = ['/api/clients', '/api/labs', '/api/prescriptions',
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
+  // Debug logging
+  console.log(`Middleware: ${pathname}, NODE_ENV: ${process.env.NODE_ENV}, BYPASS_AUTH: ${process.env.BYPASS_AUTH}`)
+  
   // Skip middleware for public assets
   if (
     pathname.startsWith('/_next') ||
@@ -41,6 +44,35 @@ export async function middleware(request: NextRequest) {
     }
     
     return NextResponse.next()
+  }
+
+  // Bypass authentication in development mode
+  const isDev = process.env.NODE_ENV === 'development'
+  const bypassAuth = process.env.BYPASS_AUTH === 'true' || process.env.DEV_MODE === 'true'
+  
+  if (isDev && bypassAuth) {
+    // Skip auth for all routes except login/verify pages in dev mode
+    if (!PUBLIC_ROUTES.includes(pathname) && !API_AUTH_ROUTES.some(route => pathname.startsWith(route))) {
+      // Add fake user headers for API routes
+      if (pathname.startsWith('/api/')) {
+        const requestHeaders = new Headers(request.headers)
+        requestHeaders.set('x-user-id', 'dev-user-id')
+        requestHeaders.set('x-user-email', 'lexthegreat223@gmail.com')
+        requestHeaders.set('x-user-roles', JSON.stringify(['DIRECTOR']))
+        
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders
+          }
+        })
+      }
+      return NextResponse.next()
+    }
+    
+    // In dev mode, redirect from login to dashboard
+    if (PUBLIC_ROUTES.includes(pathname)) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
   }
 
   // Load session for protected routes
