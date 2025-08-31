@@ -114,7 +114,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ prescriptions })
   } catch (error) {
-    console.error('GET /api/prescriptions error:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
     }
@@ -251,7 +250,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ prescription }, { status: 201 })
   } catch (error) {
-    console.error('POST /api/prescriptions error:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
     }
