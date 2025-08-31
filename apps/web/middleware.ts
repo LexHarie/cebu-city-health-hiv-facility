@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSession } from '@cebu-health/lib/auth/sessions'
-import { authRateLimit, generalRateLimit, withRateLimit } from '@cebu-health/lib/rate-limit'
+import { decodeSessionToken } from '@cebu-health/lib/auth/edge'
+import { authRateLimit, generalRateLimit } from '@cebu-health/lib/rate-limit'
 
 const PUBLIC_ROUTES = ['/login', '/verify']
 const API_AUTH_ROUTES = ['/api/auth/otp/request', '/api/auth/otp/verify']
@@ -75,8 +75,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Load session for protected routes
-  const session = await getSession()
+  // Load session for protected routes (decode JWT cookie in middleware)
+  async function getSessionFromCookie(req: NextRequest) {
+    const token = req.cookies.get('cebu-health-session')?.value
+    if (!token) return null
+    return decodeSessionToken(token)
+  }
+  const session = await getSessionFromCookie(request)
 
   // Redirect to login if not authenticated and accessing protected route
   if (!session && !PUBLIC_ROUTES.includes(pathname)) {
