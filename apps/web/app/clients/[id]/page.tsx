@@ -41,7 +41,7 @@ async function getClient(id: string): Promise<ClientFull | null> {
   try {
     const base = process.env.NEXT_PUBLIC_APP_URL;
     const url = base ? `${base}/api/clients/${id}` : `/api/clients/${id}`;
-    const res = await fetch(url, { cache: 'no-store', next: { revalidate: 0 } });
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) return null;
     const data = (await res.json()) as { client: ClientFull };
     return data.client;

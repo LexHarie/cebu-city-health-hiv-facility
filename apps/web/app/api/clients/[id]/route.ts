@@ -99,6 +99,21 @@ export async function GET(
             }
           }
         },
+        stiHistory: {
+          include: {
+            disease: true
+          }
+        },
+        stiScreenings: {
+          orderBy: { screeningDate: 'desc' },
+          take: 10,
+          include: {
+            disease: true,
+            labPanel: {
+              include: { panelType: true }
+            }
+          }
+        },
         prescriptions: {
           where: {
             isActive: true

@@ -9,6 +9,7 @@
     "db:seed": "tsx seeds/index.ts",
     "db:studio": "prisma studio",
     "db:import:mock": "tsx seeds/import-mock.ts",
+    "db:mock:full": "tsx seeds/mock-full.ts",
     "db:reset": "prisma migrate reset",
     "type-check": "tsc --noEmit"
   },
