@@ -117,11 +117,52 @@ export async function clearSession() {
 }
 
 export async function requireAuth(): Promise<SessionData> {
+  const isDev = process.env.NODE_ENV === 'development'
+  const bypass = process.env.BYPASS_AUTH === 'true' || process.env.DEV_MODE === 'true'
+  if (isDev && bypass) {
+    const email = process.env.DEV_USER_EMAIL || 'lexthegreat223@gmail.com'
+    try {
+      let user = await prisma.user.findFirst({
+        where: { email },
+        include: { roles: { include: { role: true } } }
+      })
+      if (!user) {
+        // Ensure facility and role exist
+        const facility = await prisma.facility.findFirst({ where: { code: 'CCHD' } })
+        const role = await prisma.role.findFirst({ where: { name: 'DIRECTOR' } })
+        user = await prisma.user.create({
+          data: {
+            email,
+            displayName: 'Dev User',
+            phone: '+639171234566',
+            facilityId: facility?.id || null,
+            roles: role ? {
+              create: [{ roleId: role.id }]
+            } : undefined,
+          },
+          include: { roles: { include: { role: true } } }
+        })
+      }
+      return {
+        userId: user.id,
+        email: user.email,
+        roles: user.roles.map(r => r.role.name),
+        facilityId: user.facilityId || undefined
+      }
+    } catch {
+      // fallback below
+    }
+    return {
+      userId: process.env.DEV_USER_ID || 'dev-user-id',
+      email,
+      roles: ['DIRECTOR'],
+      facilityId: process.env.DEV_FACILITY_ID,
+    }
+  }
+
   const session = await getSession()
-  
   if (!session) {
     throw new Error('Authentication required')
   }
-  
   return session
 }
