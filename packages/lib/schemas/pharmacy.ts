@@ -12,7 +12,7 @@ export const CreateMedicationSchema = z.object({
   name: z.string().min(1).max(200),
   category: MedicationCategorySchema,
   code: z.string().max(50).optional(),
-  extra: z.record(z.any()).optional(),
+  extra: z.record(z.unknown()).optional(),
   active: z.boolean().default(true)
 });
 
@@ -27,7 +27,7 @@ export const CreateRegimenSchema = z.object({
   })).min(1)
 });
 
-export const CreatePrescriptionSchema = z.object({
+const CreatePrescriptionBase = z.object({
   clientId: z.string().uuid(),
   category: MedicationCategorySchema,
   startDate: z.coerce.date(),
@@ -35,27 +35,15 @@ export const CreatePrescriptionSchema = z.object({
   prescriberId: z.string().uuid().optional(),
   instructions: z.string().optional(),
   reasonChange: z.string().optional(),
-  isActive: z.boolean().default(true)
-}).and(
-  z.discriminatedUnion("type", [
-    z.object({
-      type: z.literal("regimen"),
-      regimenId: z.string().uuid()
-    }),
-    z.object({
-      type: z.literal("medication"),
-      medicationId: z.string().uuid()
-    })
-  ])
-).transform(({ type, ...rest }) => {
-  if (type === "regimen") {
-    const { regimenId, ...data } = rest as any;
-    return { ...data, regimenId };
-  } else {
-    const { medicationId, ...data } = rest as any;
-    return { ...data, medicationId };
-  }
+  isActive: z.boolean().default(true),
 });
+
+export const CreatePrescriptionSchema = z.union([
+  CreatePrescriptionBase.extend({ type: z.literal("regimen"), regimenId: z.string().uuid() })
+    .transform(({ type: _t, regimenId, ...data }) => ({ ...data, regimenId })),
+  CreatePrescriptionBase.extend({ type: z.literal("medication"), medicationId: z.string().uuid() })
+    .transform(({ type: _t, medicationId, ...data }) => ({ ...data, medicationId })),
+]);
 
 export const UpdatePrescriptionSchema = z.object({
   endDate: z.coerce.date().optional(),
