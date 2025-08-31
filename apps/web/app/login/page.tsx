@@ -26,7 +26,11 @@ export default function LoginPage() {
       });
 
       if (response.ok) {
-        window.location.href = "/verify";
+        const params = new URLSearchParams();
+        params.set("type", otpType);
+        if (otpType === "EMAIL") params.set("email", email);
+        if (otpType === "SMS") params.set("phone", phone);
+        window.location.href = `/verify?${params.toString()}`;
       }
     } catch (error) {
       // Handle login error
