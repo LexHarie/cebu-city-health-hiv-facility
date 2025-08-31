@@ -8,6 +8,7 @@ import {
   RESOURCES, 
   ACTIONS, 
   SCOPES, 
+  ROLE_HIERARCHY,
   type Role, 
   type Permission 
 } from './constants'
