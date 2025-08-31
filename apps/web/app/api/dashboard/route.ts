@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@cebu-health/db'
+import { PrismaClient, Prisma } from '@cebu-health/db'
 import { requireAuth } from '@cebu-health/lib/auth/sessions'
 
 const prisma = new PrismaClient()
@@ -33,12 +33,12 @@ export async function GET(request: NextRequest) {
         }
       }),
 
-      prisma.$queryRaw`
+      prisma.$queryRaw<{ population: string; count: number }[]>`
         SELECT l.label as population, COUNT(*)::int as count
         FROM client_population_map m
         JOIN lookups l ON l.id = m.population_id
         JOIN clients c ON c.id = m.client_id
-        ${session.facilityId ? `WHERE c.facility_id = '${session.facilityId}'` : ''}
+        ${session.facilityId ? Prisma.sql`WHERE c.facility_id = ${session.facilityId}` : Prisma.empty}
         GROUP BY l.label
         ORDER BY count DESC
         LIMIT 10
@@ -102,25 +102,25 @@ export async function GET(request: NextRequest) {
       })
     ])
 
-    const enrollmentsByMonth = await prisma.$queryRaw`
+    const enrollmentsByMonth = await prisma.$queryRaw<{ month: Date; count: number }[]>`
       SELECT 
         date_trunc('month', date_enrolled) as month,
         COUNT(*)::int as count
       FROM clients
-      ${session.facilityId ? `WHERE facility_id = '${session.facilityId}'` : ''}
       WHERE date_enrolled >= date_trunc('month', NOW() - INTERVAL '11 months')
+      ${session.facilityId ? Prisma.sql` AND facility_id = ${session.facilityId}` : Prisma.empty}
       GROUP BY date_trunc('month', date_enrolled)
       ORDER BY month ASC
     `
 
-    const viralLoadStatus = await prisma.$queryRaw`
+    const viralLoadStatus = await prisma.$queryRaw<{ status: string; count: number }[]>`
       SELECT 
         cs.viral_load_status as status,
         COUNT(*)::int as count
       FROM clinical_summaries cs
       JOIN clients c ON c.id = cs.client_id
-      ${session.facilityId ? `WHERE c.facility_id = '${session.facilityId}'` : ''}
       WHERE cs.viral_load_status IS NOT NULL
+      ${session.facilityId ? Prisma.sql` AND c.facility_id = ${session.facilityId}` : Prisma.empty}
       GROUP BY cs.viral_load_status
     `
 
@@ -193,6 +193,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ dashboard })
   } catch (error) {
+    // Temporary detailed logging in dev
+    // eslint-disable-next-line no-console
     console.error('GET /api/dashboard error:', error)
     if (error instanceof Error && error.message === 'Authentication required') {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
